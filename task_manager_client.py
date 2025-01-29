@@ -74,10 +74,10 @@ def delete_task(task_id):
 # Example Usage
 if __name__ == "__main__":
     print("Registering user...")
-    print(register_user("testing", "testing@example.com", "testing123"))
+    print(register_user("hello", "hello@example.com", "hello123"))
 
     print("\nLogging in...")
-    print(login_user("test@example.com", "test123"))
+    print(login_user("hello@example.com", "hello123"))
 
     print("\nCreating a new task...")
     new_task = create_task("Learn FastAPI")
