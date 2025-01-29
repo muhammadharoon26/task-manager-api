@@ -6,49 +6,30 @@
 // import { connectDB } from './config/db.js';
 // import authRoutes from './routes/auth.js';
 // import taskRoutes from './routes/task.js';
-// import authMiddleware from './middlewares/authMiddleware.js';
 
 // const app = express();
-
-// // Middleware
 // app.use(express.json());
 // app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
 
-// // Connect to MongoDB
-// (async () => {
-//   await connectDB();
-// })();
-
-// // Create HTTP server and configure Socket.io
+// connectDB();
 // const server = createServer(app);
 // const io = new Server(server, {
-//   cors: {
-//     origin: process.env.FRONTEND_URL || '*',
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   },
+//     cors: {
+//         origin: process.env.FRONTEND_URL || '*',
+//         methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//     },
 // });
 
 // io.on('connection', (socket) => {
-//   console.log('User connected');
-
-//   socket.on('disconnect', () => {
-//     console.log('User disconnected');
-//   });
+//     console.log('User connected');
+//     socket.on('disconnect', () => {
+//         console.log('User disconnected');
+//     });
 // });
 
-// // Authentication Routes
 // app.use('/api/auth', authRoutes);
+// app.use('/api/tasks', taskRoutes);
 
-// // Task Routes (Protected)
-// app.use('/api/tasks', authMiddleware, taskRoutes);
-
-// // Global Error Handler
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).json({ message: 'Something went wrong!', error: err.message });
-// });
-
-// // Start Server
 // const PORT = process.env.PORT || 5000;
 // server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
@@ -59,7 +40,7 @@
 
 
 
-
+// server.js
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -68,13 +49,16 @@ import { Server } from 'socket.io';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.js';
 import taskRoutes from './routes/task.js';
-import authMiddleware from './middlewares/authMiddleware.js';
+import mongoose from 'mongoose';
 
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
 
 // Connect to MongoDB
 (async () => {
@@ -83,7 +67,7 @@ app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
     console.log('✔ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error.message);
-    process.exit(1); // Exit process on DB connection failure
+    process.exit(1);
   }
 })();
 
@@ -93,33 +77,60 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   },
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected');
+  console.log('User connected:', socket.id);
+
+  socket.on('taskUpdate', (data) => {
+    socket.broadcast.emit('taskUpdated', data);
+  });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('User disconnected:', socket.id);
   });
 });
 
-// Authentication Routes
-app.use('/api/auth', authRoutes);
+// Base route
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Task Manager API' });
+});
 
-// Task Routes (Protected)
-app.use('/api/tasks', authMiddleware, taskRoutes);
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('Error stack:', err.stack);
+  console.error('Error:', err);
+  
+  if (err instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({ message: err.message });
+  }
+  
+  if (err.name === 'MongoServerError' && err.code === 11000) {
+    return res.status(409).json({ message: 'Resource already exists' });
+  }
+
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
-    message: err.message || 'Something went wrong!',
-    error: process.env.NODE_ENV === 'production' ? null : err.stack,
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Socket.IO enabled`);
+});
+
+export default app;
