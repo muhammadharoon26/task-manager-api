@@ -39,9 +39,25 @@ def get_tasks():
         return {"error": "Invalid JSON response from server"}
 
 
+# def create_task(title):
+#     url = f"{BASE_URL}/tasks"
+#     data = {"title": title}
+#     response = requests.post(url, json=data, headers=HEADERS)
+
+#     if response.status_code != 201:
+#         print("Error:", response.status_code, response.text)
+#         return {"error": "Failed to create task"}
+
+#     return response.json()
+
+
 def create_task(title):
     url = f"{BASE_URL}/tasks"
     data = {"title": title}
+
+    # Debug: Print the token being used
+    print("Using token:", HEADERS.get("Authorization"))
+
     response = requests.post(url, json=data, headers=HEADERS)
 
     if response.status_code != 201:
@@ -71,13 +87,13 @@ def delete_task(task_id):
 
 if __name__ == "__main__":
     print("Registering user...")
-    print(register_user("hello", "hello@example.com", "hello123"))
+    print(register_user("asd", "asd@example.com", "asd123"))
 
     print("\nLogging in...")
-    print(login_user("hello@example.com", "hello123"))
+    print(login_user("asd@example.com", "asd123"))
 
     print("\nCreating a new task...")
-    new_task = create_task("Learn FastAPI")
+    new_task = create_task("Learn FastAPI now")
     print(new_task)
 
     if "_id" in new_task:
@@ -87,7 +103,10 @@ if __name__ == "__main__":
         print(get_tasks())
 
         print("\nUpdating task...")
-        print(update_task(task_id, title="Learn FastAPI and Flask", completed=True))
+        print(update_task(task_id, title="Learn", completed=False))
 
-        print("\nDeleting task...")
-        print(delete_task(task_id))
+        print("\nGetting all tasks...")
+        print(get_tasks())
+
+        # print("\nDeleting task...")
+        # print(delete_task(task_id))
