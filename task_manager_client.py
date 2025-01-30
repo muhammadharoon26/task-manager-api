@@ -74,14 +74,14 @@ def delete_task(task_id):
 
 
 if __name__ == "__main__":
-    # print("Registering user...")
-    # print(register_user("asd", "asd@example.com", "asd123"))
+    print("Registering user...")
+    print(register_user("testUser", "testUser@example.com", "testUser123"))
 
     print("\nLogging in...")
-    print(login_user("asd@example.com", "asd123"))
+    print(login_user("testUser@example.com", "testUser123"))
 
     print("\nCreating a new task...")
-    new_task = create_task("Learn FastAPI now")
+    new_task = create_task("Task")
     print(new_task)
 
     if "_id" in new_task:
@@ -91,10 +91,10 @@ if __name__ == "__main__":
         print(get_tasks())
 
         print("\nUpdating task...")
-        print(update_task(task_id, title="Learn", completed=False))
+        print(update_task(task_id, title="Task 1", completed=False))
 
         print("\nGetting all tasks...")
         print(get_tasks())
 
-        # print("\nDeleting task...")
-        # print(delete_task(task_id))
+        print("\nDeleting task...")
+        print(delete_task(task_id))
