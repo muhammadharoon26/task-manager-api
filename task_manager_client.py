@@ -39,18 +39,6 @@ def get_tasks():
         return {"error": "Invalid JSON response from server"}
 
 
-# def create_task(title):
-#     url = f"{BASE_URL}/tasks"
-#     data = {"title": title}
-#     response = requests.post(url, json=data, headers=HEADERS)
-
-#     if response.status_code != 201:
-#         print("Error:", response.status_code, response.text)
-#         return {"error": "Failed to create task"}
-
-#     return response.json()
-
-
 def create_task(title):
     url = f"{BASE_URL}/tasks"
     data = {"title": title}
@@ -86,8 +74,8 @@ def delete_task(task_id):
 
 
 if __name__ == "__main__":
-    print("Registering user...")
-    print(register_user("asd", "asd@example.com", "asd123"))
+    # print("Registering user...")
+    # print(register_user("asd", "asd@example.com", "asd123"))
 
     print("\nLogging in...")
     print(login_user("asd@example.com", "asd123"))
